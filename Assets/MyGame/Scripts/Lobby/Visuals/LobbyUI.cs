@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LobbyUI : MonoBehaviour
@@ -10,6 +12,7 @@ public class LobbyUI : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI lobbyName;
     [SerializeField] private Button leaveLobbyBtn;
+    [SerializeField] private Button startGameBtn;
 
     [SerializeField] private PlayerInfoSingleUI[] playerInfos;
 
@@ -29,6 +32,11 @@ public class LobbyUI : MonoBehaviour
             LobbyManager.Instance.LeaveLobby();
         });
 
+        startGameBtn.onClick.AddListener(() =>
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
+            NetworkManager.Singleton.StartHost();
+        });
 
         LobbyManager.Instance.OnLobbyDataChanged += LobbyManager_OnLobbyDataChanged;
     }
@@ -71,6 +79,14 @@ public class LobbyUI : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
+        if(LobbyManager.Instance.IsHost())
+        {
+            startGameBtn.gameObject.SetActive(true);
+        }
+        else
+        {
+            startGameBtn.gameObject.SetActive(false);
+        }
     }
     public void Hide()
     {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
@@ -44,8 +45,6 @@ public class LobbyManager : MonoBehaviour
         };
 
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
-
-
     }
 
     private void Update()
@@ -67,9 +66,10 @@ public class LobbyManager : MonoBehaviour
                 Player = GetPlayer()
             };
 
-
             hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayer, createLobbyOptions);
             joinedLobby = hostLobby;
+
+            NetworkManager.Singleton.StartHost();
 
             OnLobbyCreated?.Invoke(this, EventArgs.Empty);
             HostLobby(hostLobby);
@@ -113,6 +113,7 @@ public class LobbyManager : MonoBehaviour
             {
                 lobby = joinedLobby
             });
+            NetworkManager.Singleton.StartClient();
         }
         catch (LobbyServiceException e)
         {
@@ -126,10 +127,13 @@ public class LobbyManager : MonoBehaviour
         {
             await LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id, AuthenticationService.Instance.PlayerId);
             joinedLobby = null;
+            hostLobby = null;
             OnLobbyDataChanged?.Invoke(this, new OnLobbyDataChangedEventArgs
             {
                 lobby = joinedLobby
             });
+
+            NetworkManager.Singleton.Shutdown();
         }
         catch (LobbyServiceException e)
         {
@@ -184,6 +188,11 @@ public class LobbyManager : MonoBehaviour
                 {"PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, playerName) }
             }
         };
+    }
+
+    public bool IsHost()
+    {
+        return hostLobby != null;
     }
 
     public void SetPlayerName(string playerName)
