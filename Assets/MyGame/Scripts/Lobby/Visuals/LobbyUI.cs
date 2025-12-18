@@ -34,8 +34,7 @@ public class LobbyUI : MonoBehaviour
 
         startGameBtn.onClick.AddListener(() =>
         {
-            NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
-            NetworkManager.Singleton.StartHost();
+            SceneLoader.LoadSceneByNetwork(SceneLoader.Scene.Game);
         });
 
         LobbyManager.Instance.OnLobbyDataChanged += LobbyManager_OnLobbyDataChanged;
