@@ -249,6 +249,7 @@ GameObject:
   - component: {fileID: 6043586806821165934}
   - component: {fileID: 9062757016892618289}
   - component: {fileID: 5110330281283450301}
+  - component: {fileID: -5045441374360399908}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -416,3 +417,16 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &-5045441374360399908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232304743259429802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: daa094343a2250643b0c9700f1603e26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteract
+  maxDistance: 10
