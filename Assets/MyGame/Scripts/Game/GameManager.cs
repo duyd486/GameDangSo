@@ -6,7 +6,6 @@ public class GameManager : NetworkBehaviour
     public static GameManager Instance;
 
     [SerializeField] GameObject keyPrefab;
-    [SerializeField] Transform[] spawnPoints;
     [SerializeField] float gameDuration = 300f; // 5 minutes
     [SerializeField] int totalKeys = 10;
     [SerializeField] bool isPlaying = false;
@@ -39,7 +38,6 @@ public class GameManager : NetworkBehaviour
 
     private void Update()
     {
-        Debug.Log("Current Server Time: " + NetworkManager.ServerTime.Time);
 
 
 
@@ -70,8 +68,46 @@ public class GameManager : NetworkBehaviour
 
         endTime.Value = NetworkManager.ServerTime.Time + gameDuration;
 
+        SpawnKey();
 
         isPlaying = true;
+    }
+
+
+    void SpawnKey()
+    {
+        for (int i = 0; i < totalKeys; i++)
+        {
+            Vector3 pos = new Vector3(Random.Range(-70f, 70f), 0.3f, Random.Range(-70f, 70f));
+            GameObject keyObject = Instantiate(keyPrefab, pos, Quaternion.identity);
+            keyObject.GetComponent<NetworkObject>().Spawn();
+        }
+    }
+
+
+    public void OnKeyPicked()
+    {
+        if (!IsServer) return;
+        collectedKeys.Value += 1;
+        if (collectedKeys.Value >= totalKeys)
+        {
+            WinGame();
+        }
+        NotifyKeyPickedClientRpc(totalKeys - collectedKeys.Value);
+    }
+
+    [ClientRpc]
+    void NotifyKeyPickedClientRpc(int keysleft)
+    {
+        Debug.Log("A key has been picked up!, " + keysleft.ToString() + " key left");
+    }
+
+
+
+    private void WinGame()
+    {
+        Debug.Log("Congratulations! You won the game!");
+        isPlaying = false;
     }
 
     private void LoseGame()
