@@ -1,9 +1,13 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerInteract : MonoBehaviour
 {
     [SerializeField] private float maxDistance = 10f;
+    [SerializeField] private Transform hand;
     private bool canInteract = false;
+    private bool isCarrying = false;
+    private Key key;
 
     private void Update()
     {
@@ -22,7 +26,7 @@ public class PlayerInteract : MonoBehaviour
             canInteract = true;
             if (Input.GetKeyDown(KeyCode.E))
             {
-                hit.transform.GetComponentInParent<IInteractable>().Interact();
+                hit.transform.GetComponentInParent<IInteractable>().Interact(this);
             }
         }
         else
@@ -31,8 +35,26 @@ public class PlayerInteract : MonoBehaviour
         }
     }
 
+    public void CarryThisKey(Key key)
+    {
+        isCarrying = true;
+        key.gameObject.transform.SetParent(GetComponent<NetworkObject>().transform, false);
+        key.transform.localPosition = new Vector3(-0.9f, 0.2f, 1f);
+        this.key = key;
+    }
+
+    public void AddThisKey()
+    {
+        isCarrying = false;
+        this.key = null;
+    }
+
     public bool GetCanInteract()
     {
         return canInteract;
+    }
+    public bool GetIsCarrying()
+    {
+        return isCarrying;
     }
 }

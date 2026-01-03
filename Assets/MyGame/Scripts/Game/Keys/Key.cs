@@ -1,17 +1,28 @@
-using Unity.Netcode;
+﻿using Unity.Netcode;
 
 public class Key : NetworkBehaviour, IInteractable
 {
-    public void Interact()
+    public void Interact(PlayerInteract player)
     {
-        TryPickedUpServerRpc();
+        TryPickedUpServerRpc(player.GetComponent<NetworkObject>().OwnerClientId);
     }
 
+
+
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-    void TryPickedUpServerRpc()
+    void TryPickedUpServerRpc(ulong clientId)
     {
         if (!IsServer) return;
+
+        if (!NetworkManager.Singleton.ConnectedClients
+            .TryGetValue(clientId, out var client)) return;
+
+        var player = client.PlayerObject.GetComponent<PlayerInteract>();
+        if (player == null) return;
+
+        if (player.GetIsCarrying()) return;
+
+        player.CarryThisKey(this);
         GameManager.Instance.OnKeyPicked();
-        NetworkObject.Despawn();
     }
 }

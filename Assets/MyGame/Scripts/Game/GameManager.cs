@@ -72,7 +72,7 @@ public class GameManager : NetworkBehaviour
     {
         for (int i = 0; i < totalKeys; i++)
         {
-            Vector3 pos = new Vector3(UnityEngine.Random.Range(-70f, 70f), 0.3f, UnityEngine.Random.Range(-70f, 70f));
+            Vector3 pos = new Vector3(UnityEngine.Random.Range(-70f, 70f), 0.6f, UnityEngine.Random.Range(-70f, 70f));
             GameObject keyObject = Instantiate(keyPrefab, pos, Quaternion.identity);
             keyObject.GetComponent<NetworkObject>().Spawn();
         }
@@ -82,19 +82,24 @@ public class GameManager : NetworkBehaviour
     public void OnKeyPicked()
     {
         if (!IsServer) return;
+        NotifyKeyPickedClientRpc();
+    }
+
+    public void OnKeyAdded()
+    {
+        if (!IsServer) return;
         collectedKeys.Value += 1;
         if (collectedKeys.Value >= totalKeys)
         {
             WinGameClientRpc();
             isPlaying.Value = false;
         }
-        NotifyKeyPickedClientRpc(totalKeys - collectedKeys.Value);
     }
 
     [ClientRpc]
-    void NotifyKeyPickedClientRpc(int keysleft)
+    void NotifyKeyPickedClientRpc()
     {
-        Debug.Log("A key has been picked up!, " + keysleft.ToString() + " key left");
+        Debug.Log("A key has been picked up!");
     }
 
 
