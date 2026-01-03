@@ -9,6 +9,8 @@ public class PlayerLocomotion : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        if (!GameManager.Instance.GetIsPlaying()) return;
+
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 

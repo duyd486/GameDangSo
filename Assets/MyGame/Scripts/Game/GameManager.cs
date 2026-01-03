@@ -1,4 +1,5 @@
-﻿using Unity.Netcode;
+﻿using System;
+using Unity.Netcode;
 using UnityEngine;
 
 public class GameManager : NetworkBehaviour
@@ -6,62 +7,55 @@ public class GameManager : NetworkBehaviour
     public static GameManager Instance;
 
     [SerializeField] GameObject keyPrefab;
-    [SerializeField] float gameDuration = 300f; // 5 minutes
+
+    [SerializeField] float gameDuration = 60f;
     [SerializeField] int totalKeys = 10;
-    [SerializeField] bool isPlaying = false;
 
-
+    public NetworkVariable<bool> isPlaying = new NetworkVariable<bool>(false);
     public NetworkVariable<double> endTime = new NetworkVariable<double>();
     public NetworkVariable<int> collectedKeys = new NetworkVariable<int>(0);
 
 
 
 
+    public static event EventHandler<OnGameOverEventArgs> OnGameOver;
+    public class OnGameOverEventArgs : EventArgs
+    {
+        public bool isLose;
+    }
+
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
 
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
 
-        Instance = this;
-
-
-
         if (!IsServer) return;
 
         // Server làm việc ở đây
 
-
-
-        //SpawnKeys();
     }
 
 
     private void Update()
     {
-
-
-
-
-
-
-
         if (!IsServer) return;
 
-        if (NetworkManager.ServerTime.Time >= endTime.Value && isPlaying)
+        if (NetworkManager.ServerTime.Time >= endTime.Value && isPlaying.Value)
         {
-            LoseGame();
+            LoseGameClientRpc();
+            isPlaying.Value = false;
         }
     }
 
 
     public void StartGame()
     {
-
-
-
-
-
-
         if (!IsServer) return;
 
         Debug.Log("StartGame called on SERVER");
@@ -70,7 +64,7 @@ public class GameManager : NetworkBehaviour
 
         SpawnKey();
 
-        isPlaying = true;
+        isPlaying.Value = true;
     }
 
 
@@ -78,7 +72,7 @@ public class GameManager : NetworkBehaviour
     {
         for (int i = 0; i < totalKeys; i++)
         {
-            Vector3 pos = new Vector3(Random.Range(-70f, 70f), 0.3f, Random.Range(-70f, 70f));
+            Vector3 pos = new Vector3(UnityEngine.Random.Range(-70f, 70f), 0.3f, UnityEngine.Random.Range(-70f, 70f));
             GameObject keyObject = Instantiate(keyPrefab, pos, Quaternion.identity);
             keyObject.GetComponent<NetworkObject>().Spawn();
         }
@@ -91,7 +85,8 @@ public class GameManager : NetworkBehaviour
         collectedKeys.Value += 1;
         if (collectedKeys.Value >= totalKeys)
         {
-            WinGame();
+            WinGameClientRpc();
+            isPlaying.Value = false;
         }
         NotifyKeyPickedClientRpc(totalKeys - collectedKeys.Value);
     }
@@ -103,16 +98,32 @@ public class GameManager : NetworkBehaviour
     }
 
 
-
-    private void WinGame()
+    [ClientRpc]
+    private void WinGameClientRpc()
     {
         Debug.Log("Congratulations! You won the game!");
-        isPlaying = false;
+        OnGameOver?.Invoke(this, new OnGameOverEventArgs
+        {
+            isLose = false,
+        });
     }
 
-    private void LoseGame()
+    [ClientRpc]
+    private void LoseGameClientRpc()
     {
         Debug.Log("Game Over! You lost.");
-        isPlaying = false;
+        OnGameOver?.Invoke(this, new OnGameOverEventArgs
+        {
+            isLose = true,
+        });
+    }
+
+    public bool GetIsPlaying()
+    {
+        return isPlaying.Value;
+    }
+    public double GetEndtime()
+    {
+        return endTime.Value;
     }
 }

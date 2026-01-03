@@ -7,7 +7,7 @@ public class Key : NetworkBehaviour, IInteractable
         TryPickedUpServerRpc();
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     void TryPickedUpServerRpc()
     {
         if (!IsServer) return;

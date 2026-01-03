@@ -10,7 +10,7 @@ public class PlayerCamera : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if(!IsOwner) return;
+        if (!IsOwner) return;
 
         cinemachineCamera = FindFirstObjectByType<CinemachineCamera>();
 
@@ -21,9 +21,22 @@ public class PlayerCamera : NetworkBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (!IsOwner) return;
+        if (!GameManager.Instance.GetIsPlaying())
+        {
+            cinemachineCamera.gameObject.SetActive(false);
+        }
+        else
+        {
+            cinemachineCamera.gameObject.SetActive(true);
+        }
+    }
+
     public override void OnNetworkDespawn()
     {
-        if(!IsOwner) return;
+        if (!IsOwner) return;
         Camera.main.transform.SetParent(null);
     }
 }
