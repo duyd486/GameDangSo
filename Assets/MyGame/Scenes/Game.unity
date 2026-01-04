@@ -2124,8 +2124,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GhostSpawner
   ShowTopMostFoldoutHeaderGroup: 1
   ghostList: {fileID: 11400000, guid: e9d825636f38c194285d1012c2987012, type: 2}
-  spawnAreaMin: {x: -100, y: 1, z: -100}
-  spawnAreaMax: {x: 100, y: 1, z: 100}
+  spawnAreaMin: {x: -100, y: 0, z: -100}
+  spawnAreaMax: {x: 100, y: 0, z: 100}
 --- !u!114 &901087272
 MonoBehaviour:
   m_ObjectHideFlags: 0

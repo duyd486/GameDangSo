@@ -5,8 +5,8 @@ public class GhostSpawner : NetworkBehaviour
 {
     [SerializeField] private GhostList ghostList;
 
-    [SerializeField] private Vector3 spawnAreaMin = new Vector3(-100f, 1f, -100f);
-    [SerializeField] private Vector3 spawnAreaMax = new Vector3(100f, 1f, 100f);
+    [SerializeField] private Vector3 spawnAreaMin = new Vector3(-100f, 0f, -100f);
+    [SerializeField] private Vector3 spawnAreaMax = new Vector3(100f, 0f, 100f);
 
     private void Start()
     {
