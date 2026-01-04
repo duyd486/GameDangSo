@@ -1,4 +1,4 @@
-using Unity.Netcode;
+﻿using Unity.Netcode;
 using UnityEngine;
 
 public class GhostAI : NetworkBehaviour
@@ -70,7 +70,37 @@ public class GhostAI : NetworkBehaviour
             return;
         }
 
+        if (dist < data.jumpScareRadius)
+        {
+            //jumpscare
+            TriggerJumpscare(targetPlayer.GetComponent<NetworkObject>().OwnerClientId);
+            //go to somewhere else
+            transform.position = GhostSpawner.Instance.GetRandomSpawnPosition();
+        }
+
         MoveTowards(targetPlayer.position, data.chaseSpeed);
+    }
+
+    void TriggerJumpscare(ulong clientId)
+    {
+        ShowJumpscareClientRpc(clientId);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    void ShowJumpscareClientRpc(ulong clientId)
+    {
+        if (NetworkManager.Singleton.LocalClientId != clientId)
+            return;
+
+        if (JumpscareUI.Instance == null)
+        {
+            Debug.LogError("Client chưa có JumpscareUI");
+            return;
+        }
+
+        Debug.Log("Hiện Jumpscare cho client " + clientId);
+
+        JumpscareUI.Instance.ShowJumpscare(data.jumpscareSprite, data.jumpscareTime);
     }
 
     void DetectPlayer()

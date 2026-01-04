@@ -3,10 +3,17 @@ using UnityEngine;
 
 public class GhostSpawner : NetworkBehaviour
 {
+    public static GhostSpawner Instance;
+
     [SerializeField] private GhostList ghostList;
 
     [SerializeField] private Vector3 spawnAreaMin = new Vector3(-100f, 0f, -100f);
     [SerializeField] private Vector3 spawnAreaMax = new Vector3(100f, 0f, 100f);
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -15,7 +22,6 @@ public class GhostSpawner : NetworkBehaviour
 
     private void GameManager_OnGameStart(object sender, GameManager.OnGameStartEventArgs e)
     {
-        Debug.Log("Game Started: Spawning " + e.totalGhosts + " ghosts.");
         SpawnGhosts(e.totalGhosts);
     }
 
@@ -26,14 +32,13 @@ public class GhostSpawner : NetworkBehaviour
         GhostData[] ghostDatas = ghostList.ghosts;
         for (int i = 0; i < totalGhosts; i++)
         {
-            Debug.Log("Spawning ghost " + (i + 1));
             var ghostData = ghostDatas[Random.Range(0, ghostDatas.Length)];
             var ghost = Instantiate(ghostData.ghostPrefab, GetRandomSpawnPosition(), Quaternion.identity);
             ghost.GetComponent<GhostAI>().SetData(ghostData);
             ghost.GetComponent<NetworkObject>().Spawn();
         }
     }
-    private Vector3 GetRandomSpawnPosition()
+    public Vector3 GetRandomSpawnPosition()
     {
         float x = Random.Range(spawnAreaMin.x, spawnAreaMax.x);
         float y = Random.Range(spawnAreaMin.y, spawnAreaMax.y);
