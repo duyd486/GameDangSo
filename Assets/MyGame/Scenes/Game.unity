@@ -204,7 +204,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2198070607866851036, guid: 78a11f73ab064cf44b18ea9394972716, type: 3}
       propertyPath: m_MaxPacketQueueSize
-      value: 4096
+      value: 16384
       objectReference: {fileID: 0}
     - target: {fileID: 2982400168093239812, guid: 78a11f73ab064cf44b18ea9394972716, type: 3}
       propertyPath: NetworkConfig.PlayerPrefab

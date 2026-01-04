@@ -2,9 +2,9 @@
 
 public class Key : NetworkBehaviour, IInteractable
 {
-    public void Interact(PlayerInteract player)
+    public void Interact(ulong clientId)
     {
-        TryPickedUpServerRpc(player.GetComponent<NetworkObject>().OwnerClientId);
+        TryPickedUpServerRpc(clientId);
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -16,11 +16,10 @@ public class Key : NetworkBehaviour, IInteractable
             .TryGetValue(clientId, out var client)) return;
 
         var player = client.PlayerObject.GetComponent<PlayerInteract>();
-        if (player == null) return;
+        if (player == null || player.GetIsCarrying()) return;
 
-        if (player.GetIsCarrying()) return;
-
-        player.CarryThisKey(this);
+        player.CarryKeyServer();
+        DestroyKeyRpc();
         GameManager.Instance.OnKeyPicked();
     }
 

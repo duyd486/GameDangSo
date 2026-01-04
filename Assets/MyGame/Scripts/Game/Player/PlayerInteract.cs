@@ -1,16 +1,32 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerInteract : MonoBehaviour
+public class PlayerInteract : NetworkBehaviour
 {
     [SerializeField] private float maxDistance = 10f;
     [SerializeField] private Transform hand;
+    [SerializeField] private GameObject keyVisual;
     private bool canInteract = false;
-    private bool isCarrying = false;
-    private Key key;
+    public NetworkVariable<bool> isCarrying = new NetworkVariable<bool>(false);
+
+    private void Start()
+    {
+        keyVisual.SetActive(false);
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        isCarrying.OnValueChanged += OnCarryChanged;
+    }
+
+    void OnCarryChanged(bool oldValue, bool newValue)
+    {
+        keyVisual.SetActive(newValue);
+    }
 
     private void Update()
     {
+        if (!IsOwner) return;
         HandleInteract();
     }
 
@@ -26,7 +42,7 @@ public class PlayerInteract : MonoBehaviour
             canInteract = true;
             if (Input.GetKeyDown(KeyCode.E))
             {
-                hit.transform.GetComponentInParent<IInteractable>().Interact(this);
+                hit.transform.GetComponentInParent<IInteractable>().Interact(OwnerClientId);
             }
         }
         else
@@ -35,19 +51,16 @@ public class PlayerInteract : MonoBehaviour
         }
     }
 
-    public void CarryThisKey(Key key)
+    public void CarryKeyServer()
     {
-        isCarrying = true;
-        key.gameObject.transform.SetParent(GetComponent<NetworkObject>().transform, false);
-        key.transform.localPosition = new Vector3(-0.9f, 0.2f, 1f);
-        this.key = key;
+        if (!IsServer) return;
+        isCarrying.Value = true;
     }
 
     public void DropKey()
     {
-        isCarrying = false;
-        key.DestroyKeyRpc();
-        this.key = null;
+        isCarrying.Value = false;
+        keyVisual.SetActive(false);
     }
 
     public bool GetCanInteract()
@@ -56,6 +69,6 @@ public class PlayerInteract : MonoBehaviour
     }
     public bool GetIsCarrying()
     {
-        return isCarrying;
+        return isCarrying.Value;
     }
 }

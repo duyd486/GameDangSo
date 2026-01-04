@@ -88,7 +88,8 @@ public class GameManager : NetworkBehaviour
     public void OnKeyAdded()
     {
         if (!IsServer) return;
-        collectedKeys.Value += 1;
+        Debug.Log("Key added to altar on SERVER");
+        collectedKeys.Value++;
         if (collectedKeys.Value >= totalKeys)
         {
             WinGameClientRpc();

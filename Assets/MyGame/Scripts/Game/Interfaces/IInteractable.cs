@@ -1,4 +1,4 @@
 public interface IInteractable
 {
-    void Interact(PlayerInteract player);
+    void Interact(ulong clientId);
 }
