@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,18 +11,25 @@ public class GameManager : NetworkBehaviour
 
     [SerializeField] float gameDuration = 60f;
     [SerializeField] int totalKeys = 10;
+    [SerializeField] int totalGhosts = 3;
 
     public NetworkVariable<bool> isPlaying = new NetworkVariable<bool>(false);
     public NetworkVariable<double> endTime = new NetworkVariable<double>();
     public NetworkVariable<int> collectedKeys = new NetworkVariable<int>(0);
 
-
-
+    public List<Key> keys = new List<Key>();
 
     public static event EventHandler<OnGameOverEventArgs> OnGameOver;
     public class OnGameOverEventArgs : EventArgs
     {
         public bool isLose;
+    }
+
+    public static event EventHandler<OnGameStartEventArgs> OnGameStart;
+    public class OnGameStartEventArgs : EventArgs
+    {
+        public int totalKeys;
+        public int totalGhosts;
     }
 
 
@@ -62,20 +70,13 @@ public class GameManager : NetworkBehaviour
 
         endTime.Value = NetworkManager.ServerTime.Time + gameDuration;
 
-        SpawnKey();
+        OnGameStart?.Invoke(this, new OnGameStartEventArgs
+        {
+            totalKeys = totalKeys,
+            totalGhosts = totalGhosts,
+        });
 
         isPlaying.Value = true;
-    }
-
-
-    void SpawnKey()
-    {
-        for (int i = 0; i < totalKeys; i++)
-        {
-            Vector3 pos = new Vector3(UnityEngine.Random.Range(-10f, 10f), 0.6f, UnityEngine.Random.Range(-10f, 10f));
-            GameObject keyObject = Instantiate(keyPrefab, pos, Quaternion.identity);
-            keyObject.GetComponent<NetworkObject>().Spawn();
-        }
     }
 
 
@@ -141,5 +142,18 @@ public class GameManager : NetworkBehaviour
     public double GetEndtime()
     {
         return endTime.Value;
+    }
+    public List<Key> GetKeys()
+    {
+        return keys;
+    }
+    public void RegisterKey(Key key)
+    {
+        if (!keys.Contains(key))
+            keys.Add(key);
+    }
+    public void UnregisterKey(Key key)
+    {
+        keys.Remove(key);
     }
 }

@@ -60,7 +60,6 @@ public class PlayerInteract : NetworkBehaviour
     public void DropKey()
     {
         isCarrying.Value = false;
-        keyVisual.SetActive(false);
     }
 
     public bool GetCanInteract()

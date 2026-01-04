@@ -32,4 +32,16 @@ public class Key : NetworkBehaviour, IInteractable
             Destroy(gameObject);
         }
     }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+            GameManager.Instance.RegisterKey(this);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (IsServer)
+            GameManager.Instance.UnregisterKey(this);
+    }
 }

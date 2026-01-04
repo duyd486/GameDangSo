@@ -4,7 +4,6 @@ public class Altar : NetworkBehaviour, IInteractable
 {
     public void Interact(ulong clientId)
     {
-        //if (!player.GetIsCarrying()) return;
         TryAddKeyServerRpc(clientId);
     }
 
@@ -18,7 +17,7 @@ public class Altar : NetworkBehaviour, IInteractable
 
         var player = client.PlayerObject.GetComponent<PlayerInteract>();
 
-        if (player == null) return;
+        if (player == null || !player.GetIsCarrying()) return;
 
         player.DropKey();
         GameManager.Instance.OnKeyAdded();
