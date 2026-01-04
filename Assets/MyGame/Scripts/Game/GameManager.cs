@@ -72,7 +72,7 @@ public class GameManager : NetworkBehaviour
     {
         for (int i = 0; i < totalKeys; i++)
         {
-            Vector3 pos = new Vector3(UnityEngine.Random.Range(-70f, 70f), 0.6f, UnityEngine.Random.Range(-70f, 70f));
+            Vector3 pos = new Vector3(UnityEngine.Random.Range(-10f, 10f), 0.6f, UnityEngine.Random.Range(-10f, 10f));
             GameObject keyObject = Instantiate(keyPrefab, pos, Quaternion.identity);
             keyObject.GetComponent<NetworkObject>().Spawn();
         }
@@ -94,12 +94,22 @@ public class GameManager : NetworkBehaviour
             WinGameClientRpc();
             isPlaying.Value = false;
         }
+        else
+        {
+            NotifyKeyAddedClientRpc(totalKeys - collectedKeys.Value);
+        }
     }
 
     [ClientRpc]
     void NotifyKeyPickedClientRpc()
     {
         Debug.Log("A key has been picked up!");
+    }
+
+    [ClientRpc]
+    void NotifyKeyAddedClientRpc(int keyLeft)
+    {
+        Debug.Log("A key has been add to atlar! " + keyLeft.ToString() + " keys left!");
     }
 
 

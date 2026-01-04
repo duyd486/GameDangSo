@@ -43,9 +43,10 @@ public class PlayerInteract : MonoBehaviour
         this.key = key;
     }
 
-    public void AddThisKey()
+    public void DropKey()
     {
         isCarrying = false;
+        key.DestroyKeyRpc();
         this.key = null;
     }
 

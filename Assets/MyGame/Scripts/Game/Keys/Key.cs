@@ -7,8 +7,6 @@ public class Key : NetworkBehaviour, IInteractable
         TryPickedUpServerRpc(player.GetComponent<NetworkObject>().OwnerClientId);
     }
 
-
-
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     void TryPickedUpServerRpc(ulong clientId)
     {
@@ -24,5 +22,15 @@ public class Key : NetworkBehaviour, IInteractable
 
         player.CarryThisKey(this);
         GameManager.Instance.OnKeyPicked();
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void DestroyKeyRpc()
+    {
+        if (IsServer)
+        {
+            GetComponent<NetworkObject>().Despawn();
+            Destroy(gameObject);
+        }
     }
 }
