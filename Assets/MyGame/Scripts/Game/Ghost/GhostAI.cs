@@ -48,8 +48,6 @@ public class GhostAI : NetworkBehaviour
 
         if (Vector3.Distance(transform.position, targetKey.position) < data.reachDistance)
         {
-            //Debug.Log(Vector3.Distance(transform.position, target.position));
-            Debug.Log("Ghost reached key point " + currentKeyIndex);
             MoveToNextKey();
         }
     }
@@ -83,14 +81,13 @@ public class GhostAI : NetworkBehaviour
 
     void TriggerJumpscare(ulong clientId)
     {
-        ShowJumpscareClientRpc(clientId);
+        ShowJumpscareClientRpc(clientId, data.ghostName);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    void ShowJumpscareClientRpc(ulong clientId)
+    void ShowJumpscareClientRpc(ulong clientId, string ghostName)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId)
-            return;
+        Debug.Log(ghostName + " triggering jumpscare for client " + clientId);
 
         if (JumpscareUI.Instance == null)
         {
@@ -100,7 +97,22 @@ public class GhostAI : NetworkBehaviour
 
         Debug.Log("Hiện Jumpscare cho client " + clientId);
 
-        JumpscareUI.Instance.ShowJumpscare(data.jumpscareSprite, data.jumpscareTime);
+        //if (data == null)
+        //{
+        //    Debug.LogError("Ghost data is null");
+        //}
+        //if (data.jumpscareSprite == null)
+        //{
+        //    Debug.LogError("Jumpscare sprite is null");
+        //    return;
+        //}
+
+        //JumpscareUI.Instance.ShowJumpscare(data.jumpscareSprite, data.jumpscareTime);
+        if (!NetworkManager.Singleton.ConnectedClients
+            .TryGetValue(clientId, out var client)) return;
+
+        var player = client.PlayerObject.GetComponent<PlayerJumpscare>();
+        player.TriggerJumpscare(ghostName);
     }
 
     void DetectPlayer()

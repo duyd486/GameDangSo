@@ -22,5 +22,6 @@ MonoBehaviour:
   loseRadius: 12
   reachDistance: 0.5
   jumpscareDistance: 1.2
-  jumpscareTime: 2
-  jumpscareCooldown: 10
+  jumpscareDuration: 2
+  jumpscareCooldown: 3
+  jumpscareEffect: 0.5
