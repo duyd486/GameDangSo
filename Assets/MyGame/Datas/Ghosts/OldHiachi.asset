@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GhostData
   ghostName: OldHiachi
   ghostPrefab: {fileID: 5409465159564864822, guid: 3c23e886169521940a8764c89daa8c9e, type: 3}
-  jumpscareSprite: {fileID: 21300000, guid: ea9cd7a3c8f8afb4bb71e4729caa9fa2, type: 3}
+  jumpscareSprite: {fileID: 21300000, guid: c4185ab8c12742b4f89bcf6745bdd3ce, type: 3}
   patrolSpeed: 2
   chaseSpeed: 4
   detectRadius: 8

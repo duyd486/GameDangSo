@@ -3264,7 +3264,7 @@ MonoBehaviour:
   keyPrefab: {fileID: 147635677455799368, guid: 87184ca170c907844a3ab48e6e01148c, type: 3}
   gameDuration: 60
   totalKeys: 5
-  totalGhosts: 30
+  totalGhosts: 5
   isPlaying:
     m_InternalValue: 0
   endTime:
@@ -3535,8 +3535,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KeySpawner
   ShowTopMostFoldoutHeaderGroup: 1
   keyPrefab: {fileID: 147635677455799368, guid: 87184ca170c907844a3ab48e6e01148c, type: 3}
-  spawnAreaMin: {x: -10, y: 1, z: -10}
-  spawnAreaMax: {x: 10, y: 1, z: 10}
+  spawnAreaMin: {x: -40, y: 1, z: -40}
+  spawnAreaMax: {x: 40, y: 1, z: 40}
 --- !u!114 &1901427267
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3755,7 +3755,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -222.876, y: -189.8575}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2007836214
 MonoBehaviour:
