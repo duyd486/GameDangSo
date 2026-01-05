@@ -16,12 +16,12 @@ MonoBehaviour:
   ghostPrefab: {fileID: 6139878599016102478, guid: 8b7c116a7d2413e45b8ff6fecf4cb632, type: 3}
   jumpscareSprite: {fileID: 21300000, guid: 0a5c2ff24ff7bae449146bb77d4b49e7, type: 3}
   patrolSpeed: 2
-  chaseSpeed: 4
+  chaseSpeed: 3
   detectRadius: 8
   jumpScareRadius: 1.5
   loseRadius: 12
   reachDistance: 0.5
   jumpscareDistance: 1.2
-  jumpscareDuration: 2
+  jumpscareDuration: 1.5
   jumpscareCooldown: 3
   jumpscareEffect: 0.5
