@@ -15,12 +15,12 @@ MonoBehaviour:
   ghostName: Geisha
   ghostPrefab: {fileID: 1155027739915786459, guid: b5d37af83770e9b42998ca1ee40bf31f, type: 3}
   jumpscareSprite: {fileID: 21300000, guid: cf550c54b17e4754c8f2bcb5a56d2709, type: 3}
-  patrolSpeed: 2
-  chaseSpeed: 3
-  detectRadius: 8
+  patrolSpeed: 1.5
+  chaseSpeed: 2
+  detectRadius: 5
   jumpScareRadius: 1.5
-  loseRadius: 12
-  reachDistance: 0.5
+  loseRadius: 8
+  reachDistance: 2
   jumpscareDistance: 1.2
   jumpscareDuration: 1.5
   jumpscareCooldown: 3
