@@ -1,7 +1,6 @@
-using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerJumpscare : NetworkBehaviour
+public class PlayerJumpscare : MonoBehaviour
 {
     [SerializeField] private GhostList ghostList;
 

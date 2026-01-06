@@ -87,6 +87,8 @@ public class GhostAI : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void ShowJumpscareClientRpc(ulong clientId, string ghostName)
     {
+        if (clientId != NetworkManager.Singleton.LocalClientId) return;
+
         Debug.Log(ghostName + " triggering jumpscare for client " + clientId);
 
         if (JumpscareUI.Instance == null)
