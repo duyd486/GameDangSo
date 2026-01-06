@@ -23,7 +23,7 @@ public class GhostSpawner : NetworkBehaviour
         GameManager.OnGameStart += GameManager_OnGameStart;
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         GameManager.OnGameStart -= GameManager_OnGameStart;
     }

@@ -28,7 +28,7 @@ public class MenuUI : MonoBehaviour
         createLobbyModal.SetActive(false);
     }
 
-    private async void Start()
+    private void Start()
     {
 
         playerNameInput.onValueChanged.AddListener((name) =>

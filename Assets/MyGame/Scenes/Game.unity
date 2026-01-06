@@ -606,7 +606,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7644961151691296384, guid: 78a11f73ab064cf44b18ea9394972716, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4201,7 +4201,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   ShowTopMostFoldoutHeaderGroup: 1
   keyPrefab: {fileID: 147635677455799368, guid: 87184ca170c907844a3ab48e6e01148c, type: 3}
-  gameDuration: 300
+  gameDuration: 10
   totalKeys: 5
   totalGhosts: 7
   isPlaying:
