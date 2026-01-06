@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ public class GhostSpawner : NetworkBehaviour
     [SerializeField] private Vector3 spawnAreaMin = new Vector3(-100f, 0f, -100f);
     [SerializeField] private Vector3 spawnAreaMax = new Vector3(100f, 0f, 100f);
 
+    [SerializeField] private List<GameObject> activeGhosts;
+
     private void Awake()
     {
         Instance = this;
@@ -20,8 +23,14 @@ public class GhostSpawner : NetworkBehaviour
         GameManager.OnGameStart += GameManager_OnGameStart;
     }
 
+    private void OnDestroy()
+    {
+        GameManager.OnGameStart -= GameManager_OnGameStart;
+    }
+
     private void GameManager_OnGameStart(object sender, GameManager.OnGameStartEventArgs e)
     {
+        ClearGhosts();
         SpawnGhosts(e.totalGhosts);
     }
 
@@ -34,15 +43,25 @@ public class GhostSpawner : NetworkBehaviour
         {
             var ghostData = ghostDatas[Random.Range(0, ghostDatas.Length)];
             var ghost = Instantiate(ghostData.ghostPrefab, GetRandomSpawnPosition(), Quaternion.identity);
+            activeGhosts.Add(ghost);
             ghost.GetComponent<GhostAI>().SetData(ghostData);
             ghost.GetComponent<NetworkObject>().Spawn();
         }
     }
+
+    void ClearGhosts()
+    {
+        foreach (var ghost in activeGhosts)
+        {
+            ghost.GetComponent<NetworkObject>().Despawn();
+        }
+        activeGhosts.Clear();
+    }
+
     public Vector3 GetRandomSpawnPosition()
     {
         float x = Random.Range(spawnAreaMin.x, spawnAreaMax.x);
-        float y = Random.Range(spawnAreaMin.y, spawnAreaMax.y);
         float z = Random.Range(spawnAreaMin.z, spawnAreaMax.z);
-        return new Vector3(x, y, z);
+        return new Vector3(x, 0, z);
     }
 }

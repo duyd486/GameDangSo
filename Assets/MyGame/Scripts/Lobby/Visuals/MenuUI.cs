@@ -30,7 +30,6 @@ public class MenuUI : MonoBehaviour
 
     private void Start()
     {
-        playerNameInput.text = LobbyManager.Instance.GetPlayer().Data["PlayerName"].Value;
 
         playerNameInput.onValueChanged.AddListener((name) =>
         {
@@ -52,6 +51,13 @@ public class MenuUI : MonoBehaviour
                 OnListLobbyClick?.Invoke(this, EventArgs.Empty);
             });
         });
+
+        playerNameInput.text = LobbyManager.Instance.GetPlayer().Data["PlayerName"].Value;
+        if (playerNameInput.text.IsNullOrEmpty())
+        {
+            playerNameInput.text = SceneLoader.playerName;
+            LobbyManager.Instance.SetPlayerName(playerNameInput.text);
+        }
     }
 
     private void CreateLobby()

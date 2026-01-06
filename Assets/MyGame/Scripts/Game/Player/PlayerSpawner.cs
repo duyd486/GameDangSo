@@ -1,9 +1,12 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerSpawner : NetworkBehaviour
 {
     [SerializeField] private GameObject playerPrefab;
+
+    [SerializeField] private List<GameObject> activePlayers;
     //public override void OnNetworkSpawn()
     //{
     //    base.OnNetworkSpawn();
@@ -26,9 +29,21 @@ public class PlayerSpawner : NetworkBehaviour
         GameManager.OnGameStart += GameManager_OnGameStart;
     }
 
+    private void OnDestroy()
+    {
+        GameManager.OnGameStart -= GameManager_OnGameStart;
+    }
+
     private void GameManager_OnGameStart(object sender, GameManager.OnGameStartEventArgs e)
     {
-        SpawnPlayers();
+        if (activePlayers.Count == 0)
+        {
+            SpawnPlayers();
+        }
+        else
+        {
+            ResetPlayerPos();
+        }
     }
 
     private void SpawnPlayers()
@@ -43,8 +58,17 @@ public class PlayerSpawner : NetworkBehaviour
     private void SpawnPlayerForClient(ulong clientId)
     {
         GameObject playerInstance = Instantiate(playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
+        activePlayers.Add(playerInstance);
         NetworkObject networkObject = playerInstance.GetComponent<NetworkObject>();
         networkObject.SpawnAsPlayerObject(clientId);
+    }
+
+    void ResetPlayerPos()
+    {
+        foreach (GameObject player in activePlayers)
+        {
+            player.transform.position = GetRandomSpawnPosition();
+        }
     }
 
     private Vector3 GetRandomSpawnPosition()

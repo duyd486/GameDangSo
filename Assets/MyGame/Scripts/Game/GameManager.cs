@@ -66,6 +66,8 @@ public class GameManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
+        RestartGame();
+
         RuntimeUI.Instance.PushMessage("The game has started!", false);
 
         endTime.Value = NetworkManager.ServerTime.Time + gameDuration;
@@ -77,6 +79,18 @@ public class GameManager : NetworkBehaviour
         });
 
         isPlaying.Value = true;
+    }
+
+    public void RestartGame()
+    {
+        if (!IsServer) return;
+        collectedKeys.Value = 0;
+        isPlaying.Value = false;
+        foreach (var key in keys)
+        {
+            Destroy(key.gameObject);
+        }
+        keys.Clear();
     }
 
 
