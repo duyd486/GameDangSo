@@ -1,17 +1,26 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 using UnityEngine;
 
 public class LobbyManager : MonoBehaviour
 {
     public static LobbyManager Instance { get; private set; }
 
-    public event EventHandler OnLobbyCreated;
+    public event EventHandler<OnLobbyCreatedEventArgs> OnLobbyCreated;
+    public class OnLobbyCreatedEventArgs : EventArgs
+    {
+        public Lobby hostLobby;
+    }
     public event EventHandler<OnLobbyDataChangedEventArgs> OnLobbyDataChanged;
     public class OnLobbyDataChangedEventArgs : EventArgs
     {
@@ -61,7 +70,7 @@ public class LobbyManager : MonoBehaviour
     }
 
 
-    public async void CreateLobby(string lobbyName, int maxPlayer, Action<Lobby> HostLobby)
+    public async void CreateLobby(string lobbyName, int maxPlayer)
     {
         try
         {
@@ -78,12 +87,68 @@ public class LobbyManager : MonoBehaviour
 
             NetworkManager.Singleton.StartHost();
 
-            OnLobbyCreated?.Invoke(this, EventArgs.Empty);
-            HostLobby(hostLobby);
+            OnLobbyCreated?.Invoke(this, new OnLobbyCreatedEventArgs
+            {
+                hostLobby = hostLobby
+            });
         }
         catch (LobbyServiceException e)
         {
             Debug.LogException(e);
+        }
+    }
+
+    public async Task<Lobby> CreateLobbyWithRelay(string lobbyName, int maxPlayers)
+    {
+        try
+        {
+            string region = await GetNearestRegion();
+            Debug.Log($"Sử dụng region: {region}");
+
+            // Tạo Relay allocation cho host
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxPlayers, region);
+            Debug.Log(allocation.GetType());
+
+            // Lấy join code để người chơi khác có thể join
+            string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+
+            // Tạo lobby với relay join code
+            CreateLobbyOptions options = new CreateLobbyOptions
+            {
+                IsPrivate = false,
+                Player = GetPlayer(),
+                Data = new Dictionary<string, DataObject>
+            {
+                { "RelayJoinCode", new DataObject(DataObject.VisibilityOptions.Member, joinCode) }
+            }
+            };
+
+            hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
+            joinedLobby = hostLobby;
+
+            // Cấu hình Unity Transport với Relay
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetHostRelayData(
+                allocation.RelayServer.IpV4,
+                (ushort)allocation.RelayServer.Port,
+                allocation.AllocationIdBytes,
+                allocation.Key,
+                allocation.ConnectionData
+            );
+
+            // Start host
+            NetworkManager.Singleton.StartHost();
+
+            OnLobbyCreated?.Invoke(this, new OnLobbyCreatedEventArgs
+            {
+                hostLobby = hostLobby
+            });
+
+            return hostLobby;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error creating lobby with relay: {e}");
+            return null;
         }
     }
 
@@ -115,26 +180,85 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async void JoinLobby(string id)
+    public async void JoinLobbyById(string id)
     {
         try
         {
-            QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync();
+            //QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync();
 
+            //JoinLobbyByIdOptions joinLobbyByIdOptions = new JoinLobbyByIdOptions
+            //{
+            //    Player = GetPlayer()
+            //};
+
+            joinedLobby = await JoinLobbyByIdRelay(id);
+            //joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(id, joinLobbyByIdOptions);
+            //OnLobbyDataChanged?.Invoke(this, new OnLobbyDataChangedEventArgs
+            //{
+            //    lobby = joinedLobby
+            //});
+            //NetworkManager.Singleton.StartClient();
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+
+    public async Task<Lobby> JoinLobbyByIdRelay(string id)
+    {
+        try
+        {
             JoinLobbyByIdOptions joinLobbyByIdOptions = new JoinLobbyByIdOptions
             {
                 Player = GetPlayer()
             };
             joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(id, joinLobbyByIdOptions);
+            await JoinRelayFromLobby();
             OnLobbyDataChanged?.Invoke(this, new OnLobbyDataChangedEventArgs
             {
                 lobby = joinedLobby
             });
-            NetworkManager.Singleton.StartClient();
+            return joinedLobby;
         }
-        catch (LobbyServiceException e)
+        catch (Exception e)
         {
-            Debug.LogException(e);
+            Debug.LogError($"Lỗi join lobby: {e}");
+            return null;
+        }
+    }
+
+
+    private async Task JoinRelayFromLobby()
+    {
+        try
+        {
+            // Lấy relay join code từ lobby
+            string joinCode = joinedLobby.Data["RelayJoinCode"].Value;
+            Debug.Log($"Đang join Relay với code: {joinCode}");
+
+            // Join relay allocation với WebSocket
+            JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+
+            // Cấu hình Unity Transport
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            transport.SetClientRelayData(
+                allocation.RelayServer.IpV4,
+                (ushort)allocation.RelayServer.Port,
+                allocation.AllocationIdBytes,
+                allocation.Key,
+                allocation.ConnectionData,
+                allocation.HostConnectionData
+            );
+
+            // Start client
+            NetworkManager.Singleton.StartClient();
+            Debug.Log("Đã kết nối client qua Relay");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Lỗi join Relay: {e}");
         }
     }
 
@@ -199,6 +323,30 @@ public class LobbyManager : MonoBehaviour
                     lobby = joinedLobby
                 });
             }
+        }
+    }
+
+    private async Task<string> GetNearestRegion()
+    {
+        try
+        {
+            var regions = await RelayService.Instance.ListRegionsAsync();
+
+            if (regions == null || regions.Count == 0)
+            {
+                Debug.LogWarning("Không tìm thấy regions, sử dụng region mặc định");
+                return null; // Relay sẽ tự chọn region
+            }
+
+            // Lấy region đầu tiên (thường là gần nhất)
+            string selectedRegion = regions[0].Id;
+            Debug.Log($"Regions có sẵn: {string.Join(", ", regions.Select(r => r.Id))}");
+            return selectedRegion;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Lỗi lấy regions: {e}");
+            return null;
         }
     }
 

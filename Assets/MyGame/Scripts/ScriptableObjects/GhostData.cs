@@ -23,4 +23,5 @@ public class GhostData : ScriptableObject
     public float jumpscareDuration = 2f;
     public float jumpscareCooldown = 3f;
     public float jumpscareEffect = 0.5f;
+    public float timerReduce = 10f;
 }

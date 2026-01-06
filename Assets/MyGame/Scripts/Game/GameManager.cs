@@ -77,7 +77,7 @@ public class GameManager : NetworkBehaviour
             totalKeys = totalKeys,
             totalGhosts = totalGhosts,
         });
-
+        Cursor.lockState = CursorLockMode.Locked;
         isPlaying.Value = true;
     }
 
@@ -131,6 +131,7 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void WinGameClientRpc()
     {
+        Cursor.lockState = CursorLockMode.None;
         OnGameOver?.Invoke(this, new OnGameOverEventArgs
         {
             isLose = false,
@@ -140,6 +141,7 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void LoseGameClientRpc()
     {
+        Cursor.lockState = CursorLockMode.None;
         OnGameOver?.Invoke(this, new OnGameOverEventArgs
         {
             isLose = true,

@@ -67,6 +67,7 @@ public class GameOverUI : MonoBehaviour
             resultText.text = "YOU WIN";
         }
         gameObject.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
     }
 
     public void Hide()

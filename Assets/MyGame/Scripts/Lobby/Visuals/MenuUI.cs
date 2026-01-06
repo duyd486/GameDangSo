@@ -28,7 +28,7 @@ public class MenuUI : MonoBehaviour
         createLobbyModal.SetActive(false);
     }
 
-    private void Start()
+    private async void Start()
     {
 
         playerNameInput.onValueChanged.AddListener((name) =>
@@ -60,13 +60,11 @@ public class MenuUI : MonoBehaviour
         }
     }
 
-    private void CreateLobby()
+    private async void CreateLobby()
     {
         if (nameLobbyInput.text.IsNullOrEmpty()) return;
-        LobbyManager.Instance.CreateLobby(nameLobbyInput.text, 4, (lobby) =>
-        {
-            LobbyUI.Instance.UpdateLobby(lobby);
-        });
+        //LobbyManager.Instance.CreateLobby(nameLobbyInput.text, 4);
+        await LobbyManager.Instance.CreateLobbyWithRelay(nameLobbyInput.text, 4);
         createLobbyModal.SetActive(false);
     }
 
