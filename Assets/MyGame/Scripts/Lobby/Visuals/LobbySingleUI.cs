@@ -21,7 +21,7 @@ public class LobbySingleUI : MonoBehaviour
     {
         joinBtn.onClick.AddListener(() =>
         {
-            LobbyManager.Instance.JoinLobby(lobby.Id);
+            LobbyManager.Instance.JoinLobbyById(lobby.Id);
         });
     }
 
