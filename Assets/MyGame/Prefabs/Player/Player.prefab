@@ -288,7 +288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1125887444
+  GlobalObjectIdHash: 4018058016
   InScenePlacedSourceGlobalObjectIdHash: 1125887444
   DeferredDespawnTick: 0
   Ownership: 1
@@ -449,7 +449,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 069bb6b82435f094c84ae0cb385eef34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerJumpscare
-  ShowTopMostFoldoutHeaderGroup: 1
   ghostList: {fileID: 11400000, guid: e9d825636f38c194285d1012c2987012, type: 2}
 --- !u!1 &3639825190633937739
 GameObject:
