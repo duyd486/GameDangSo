@@ -1022,7 +1022,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &413076253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3630,6 +3630,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   ShowTopMostFoldoutHeaderGroup: 1
   keyPrefab: {fileID: 147635677455799368, guid: 87184ca170c907844a3ab48e6e01148c, type: 3}
+  gameStartDelay: 3
   gameDuration: 300
   totalKeys: 5
   totalGhosts: 7

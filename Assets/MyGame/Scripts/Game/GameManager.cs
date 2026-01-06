@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -9,6 +10,7 @@ public class GameManager : NetworkBehaviour
 
     [SerializeField] GameObject keyPrefab;
 
+    [SerializeField] float gameStartDelay = 3.0f;
     [SerializeField] float gameDuration = 60f;
     [SerializeField] int totalKeys = 10;
     [SerializeField] int totalGhosts = 3;
@@ -47,6 +49,13 @@ public class GameManager : NetworkBehaviour
 
         // Server làm việc ở đây
 
+        StartCoroutine(CountDownStartGame());
+
+        IEnumerator CountDownStartGame()
+        {
+            yield return new WaitForSeconds(gameStartDelay);
+            StartGame();
+        }
     }
 
 
@@ -77,7 +86,7 @@ public class GameManager : NetworkBehaviour
             totalKeys = totalKeys,
             totalGhosts = totalGhosts,
         });
-        Cursor.lockState = CursorLockMode.Locked;
+        StartGameClientRpc();
         isPlaying.Value = true;
     }
 
@@ -127,6 +136,11 @@ public class GameManager : NetworkBehaviour
         RuntimeUI.Instance.PushMessage("A key has been added to the altar! " + keyLeft.ToString() + " keys left!", false);
     }
 
+    [ClientRpc]
+    private void StartGameClientRpc()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
 
     [ClientRpc]
     private void WinGameClientRpc()
