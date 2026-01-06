@@ -11,7 +11,7 @@ public class PlayerCamera : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         if (!IsOwner) return;
-        Cursor.lockState = CursorLockMode.Locked;
+
         cinemachineCamera = FindFirstObjectByType<CinemachineCamera>();
 
         if (cinemachineCamera != null)
