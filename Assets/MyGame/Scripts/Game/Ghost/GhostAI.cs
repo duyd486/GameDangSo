@@ -87,7 +87,10 @@ public class GhostAI : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void ShowJumpscareClientRpc(ulong clientId, string ghostName)
     {
-
+        if (IsServer)
+        {
+            GameManager.Instance.ReduceTime(data.timerReduce);
+        }
         if (clientId != NetworkManager.Singleton.LocalClientId)
         {
             RuntimeUI.Instance.PushMessage("Someone being jumpscare by " + ghostName, false);

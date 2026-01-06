@@ -105,14 +105,11 @@ public class LobbyManager : MonoBehaviour
             string region = await GetNearestRegion();
             Debug.Log($"Sử dụng region: {region}");
 
-            // Tạo Relay allocation cho host
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxPlayers, region);
             Debug.Log(allocation.GetType());
 
-            // Lấy join code để người chơi khác có thể join
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
-            // Tạo lobby với relay join code
             CreateLobbyOptions options = new CreateLobbyOptions
             {
                 IsPrivate = false,
@@ -234,11 +231,10 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-            // Lấy relay join code từ lobby
             string joinCode = joinedLobby.Data["RelayJoinCode"].Value;
             Debug.Log($"Đang join Relay với code: {joinCode}");
 
-            // Join relay allocation với WebSocket
+
             JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
             // Cấu hình Unity Transport
@@ -335,10 +331,9 @@ public class LobbyManager : MonoBehaviour
             if (regions == null || regions.Count == 0)
             {
                 Debug.LogWarning("Không tìm thấy regions, sử dụng region mặc định");
-                return null; // Relay sẽ tự chọn region
+                return null;
             }
 
-            // Lấy region đầu tiên (thường là gần nhất)
             string selectedRegion = regions[0].Id;
             Debug.Log($"Regions có sẵn: {string.Join(", ", regions.Select(r => r.Id))}");
             return selectedRegion;

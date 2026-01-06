@@ -148,6 +148,12 @@ public class GameManager : NetworkBehaviour
         });
     }
 
+    public void ReduceTime(float time)
+    {
+        if (!IsServer) return;
+        endTime.Value -= time;
+    }
+
     public bool GetIsPlaying()
     {
         return isPlaying.Value;
