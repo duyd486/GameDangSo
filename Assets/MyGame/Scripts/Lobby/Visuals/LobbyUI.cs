@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
-using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LobbyUI : MonoBehaviour
@@ -34,6 +32,7 @@ public class LobbyUI : MonoBehaviour
 
         startGameBtn.onClick.AddListener(() =>
         {
+            LobbyManager.Instance.LockLobby();
             SceneLoader.LoadSceneByNetwork(SceneLoader.Scene.Game);
         });
 
@@ -78,7 +77,7 @@ public class LobbyUI : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
-        if(LobbyManager.Instance.IsHost())
+        if (LobbyManager.Instance.IsHost())
         {
             startGameBtn.gameObject.SetActive(true);
         }

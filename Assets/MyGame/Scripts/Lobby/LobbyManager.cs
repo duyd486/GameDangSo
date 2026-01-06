@@ -91,12 +91,22 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-            QueryLobbiesOptions options = new QueryLobbiesOptions();
+            QueryLobbiesOptions options = new QueryLobbiesOptions
+            {
+                Filters = new List<QueryFilter>
+            {
+                new QueryFilter(
+                    QueryFilter.FieldOptions.IsLocked,
+                    "0",
+                    QueryFilter.OpOptions.EQ
+                )
+            }
+            };
 
-            QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync();
+            QueryResponse queryResponse =
+                await LobbyService.Instance.QueryLobbiesAsync(options);
 
             currentLobbies = queryResponse.Results;
-
             ShowLobbies();
         }
         catch (LobbyServiceException e)
@@ -145,6 +155,17 @@ public class LobbyManager : MonoBehaviour
         catch (LobbyServiceException e)
         {
             Debug.LogException(e);
+        }
+    }
+
+    public async void LockLobby()
+    {
+        if (hostLobby != null)
+        {
+            await LobbyService.Instance.UpdateLobbyAsync(hostLobby.Id, new UpdateLobbyOptions
+            {
+                IsLocked = true
+            });
         }
     }
 
