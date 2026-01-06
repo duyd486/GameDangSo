@@ -4,7 +4,17 @@ using UnityEngine;
 
 public class RuntimeUI : MonoBehaviour
 {
+    public static RuntimeUI Instance;
+
     [SerializeField] private TextMeshProUGUI timerText;
+
+    [SerializeField] private GameObject messageContainer;
+    [SerializeField] private MessageSingleUI messageSingleUI;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Update()
     {
@@ -18,5 +28,11 @@ public class RuntimeUI : MonoBehaviour
         int seconds = Mathf.FloorToInt((float)timeLeft % 60);
 
         timerText.text = $"{minutes:00}:{seconds:00}";
+    }
+
+    public void PushMessage(string message, bool isError)
+    {
+        MessageSingleUI messageSingleUITmp = Instantiate(messageSingleUI, messageContainer.transform);
+        messageSingleUITmp.SetMessage(message, isError);
     }
 }

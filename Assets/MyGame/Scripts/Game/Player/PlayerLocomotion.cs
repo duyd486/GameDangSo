@@ -57,8 +57,6 @@ public class PlayerLocomotion : NetworkBehaviour
         float targetMultiplier = 1f - speedReduction;
         currentSpeedMultiplier = targetMultiplier;
 
-        Debug.Log($"[Slow] Bắt đầu làm chậm {speedReduction * 100}% trong {remainingSlowTime}s");
-
         while (remainingSlowTime > 0f)
         {
             remainingSlowTime -= Time.deltaTime;
@@ -80,8 +78,6 @@ public class PlayerLocomotion : NetworkBehaviour
 
         remainingSlowTime = 0f;
         currentSpeedMultiplier = 1f;
-
-        Debug.Log("[Slow] Đã xóa hiệu ứng làm chậm");
     }
 
     public float GetRemainingSlowTime()

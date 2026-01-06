@@ -35,7 +35,7 @@ public class PlayerSpawner : NetworkBehaviour
     {
         foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
         {
-            Debug.Log("Spawning player for clientId: " + clientId);
+            RuntimeUI.Instance.PushMessage("Spawning player for clientId: " + clientId, false);
             SpawnPlayerForClient(clientId);
         }
     }
@@ -50,7 +50,7 @@ public class PlayerSpawner : NetworkBehaviour
     private Vector3 GetRandomSpawnPosition()
     {
         float x = Random.Range(-10f, 10f);
-        float z = Random.Range(-10f, 10f);
+        float z = Random.Range(1f, 6f);
         return new Vector3(x, 3f, z);
     }
 }
