@@ -7,6 +7,7 @@ public class RuntimeUI : MonoBehaviour
     public static RuntimeUI Instance;
 
     [SerializeField] private TextMeshProUGUI timerText;
+    [SerializeField] private TextMeshProUGUI keyLeftText;
 
     [SerializeField] private GameObject messageContainer;
     [SerializeField] private MessageSingleUI messageSingleUI;
@@ -14,6 +15,17 @@ public class RuntimeUI : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+    }
+
+    private void Start()
+    {
+        GameManager.Instance.collectedKeys.OnValueChanged += UpdateKeyLeft;
+        keyLeftText.text = "Keys: " + "0/" + GameManager.Instance.GetTotalKeys();
+    }
+
+    private void UpdateKeyLeft(int previousValue, int newValue)
+    {
+        keyLeftText.text = "Keys: " + newValue.ToString() + "/" + GameManager.Instance.GetTotalKeys();
     }
 
     private void Update()

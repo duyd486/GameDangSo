@@ -166,6 +166,10 @@ public class GameManager : NetworkBehaviour
     {
         return keys;
     }
+    public int GetTotalKeys()
+    {
+        return totalKeys;
+    }
     public void RegisterKey(Key key)
     {
         if (!keys.Contains(key))
