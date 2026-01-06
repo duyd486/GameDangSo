@@ -13,18 +13,23 @@ public class ListLobbyUI : MonoBehaviour
     private void Start()
     {
         MenuUI.Instance.OnListLobbyClick += MenuUI_OnListLobbyClick;
-
+        LobbyManager.Instance.OnListLobbiesChanged += LobbyManager_OnListLobbiesChanged;
 
         Hide();
         backBtn.onClick.AddListener(() =>
         {
             Hide();
         });
-        reloadBtn.onClick.AddListener(() =>
+        reloadBtn.onClick.AddListener(async () =>
         {
             Debug.Log("Reload");
-            LobbyManager.Instance.ListLobbies(UpdateListLobby);
+            await LobbyManager.Instance.ListLobbies();
         });
+    }
+
+    private void LobbyManager_OnListLobbiesChanged(object sender, LobbyManager.OnListLobbiesChangedEventArgs e)
+    {
+        UpdateListLobby();
     }
 
     private void MenuUI_OnListLobbyClick(object sender, System.EventArgs e)

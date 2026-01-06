@@ -24,7 +24,9 @@ public class GameOverUI : MonoBehaviour
                 return;
             }
             SceneLoader.LoadScene(SceneLoader.Scene.Lobby);
+            NetworkManager.Singleton.Shutdown();
         });
+
         if (NetworkManager.Singleton.IsHost)
         {
             restartBtn.gameObject.SetActive(true);

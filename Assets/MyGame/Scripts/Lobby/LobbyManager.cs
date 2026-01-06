@@ -27,7 +27,11 @@ public class LobbyManager : MonoBehaviour
         public Lobby lobby;
     }
 
-    private Lobby hostLobby;
+    public event EventHandler<OnListLobbiesChangedEventArgs> OnListLobbiesChanged;
+    public class OnListLobbiesChangedEventArgs : EventArgs
+    {
+        public List<Lobby> lobbies;
+    }
 
     private Lobby joinedLobby;
 
@@ -43,11 +47,13 @@ public class LobbyManager : MonoBehaviour
 
     private async void Start()
     {
+        LoadingUI.Instance.Show();
         await UnityServices.InitializeAsync();
 
         if (AuthenticationService.Instance.IsSignedIn)
         {
             playerName = SceneLoader.playerName;
+            LoadingUI.Instance.Hide();
             return;
         }
         playerName = "duy" + UnityEngine.Random.Range(10, 99);
@@ -61,6 +67,7 @@ public class LobbyManager : MonoBehaviour
         };
 
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        LoadingUI.Instance.Hide();
     }
 
     private void Update()
@@ -82,14 +89,13 @@ public class LobbyManager : MonoBehaviour
                 Player = GetPlayer()
             };
 
-            hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayer, createLobbyOptions);
-            joinedLobby = hostLobby;
+            joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayer, createLobbyOptions);
 
             NetworkManager.Singleton.StartHost();
 
             OnLobbyCreated?.Invoke(this, new OnLobbyCreatedEventArgs
             {
-                hostLobby = hostLobby
+                hostLobby = joinedLobby
             });
         }
         catch (LobbyServiceException e)
@@ -102,6 +108,8 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
+            LoadingUI.Instance.Show();
+
             string region = await GetNearestRegion();
             Debug.Log($"Sử dụng region: {region}");
 
@@ -120,8 +128,7 @@ public class LobbyManager : MonoBehaviour
             }
             };
 
-            hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
-            joinedLobby = hostLobby;
+            joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
 
             // Cấu hình Unity Transport với Relay
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetHostRelayData(
@@ -137,22 +144,27 @@ public class LobbyManager : MonoBehaviour
 
             OnLobbyCreated?.Invoke(this, new OnLobbyCreatedEventArgs
             {
-                hostLobby = hostLobby
+                hostLobby = joinedLobby
             });
 
-            return hostLobby;
+            LoadingUI.Instance.Hide();
+
+            return joinedLobby;
         }
         catch (Exception e)
         {
+            LoadingUI.Instance.Hide();
             Debug.LogError($"Error creating lobby with relay: {e}");
             return null;
         }
     }
 
-    public async void ListLobbies(Action ShowLobbies)
+    public async Task<List<Lobby>> ListLobbies()
     {
         try
         {
+            LoadingUI.Instance.Show();
+
             QueryLobbiesOptions options = new QueryLobbiesOptions
             {
                 Filters = new List<QueryFilter>
@@ -169,11 +181,21 @@ public class LobbyManager : MonoBehaviour
                 await LobbyService.Instance.QueryLobbiesAsync(options);
 
             currentLobbies = queryResponse.Results;
-            ShowLobbies();
+
+            OnListLobbiesChanged?.Invoke(this, new OnListLobbiesChangedEventArgs
+            {
+                lobbies = currentLobbies
+            });
+
+            LoadingUI.Instance.Hide();
+
+            return currentLobbies;
         }
         catch (LobbyServiceException e)
         {
+            LoadingUI.Instance.Hide();
             Debug.LogException(e);
+            return null;
         }
     }
 
@@ -181,6 +203,9 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
+            LoadingUI.Instance.Show();
+
+
             //QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync();
 
             //JoinLobbyByIdOptions joinLobbyByIdOptions = new JoinLobbyByIdOptions
@@ -188,16 +213,22 @@ public class LobbyManager : MonoBehaviour
             //    Player = GetPlayer()
             //};
 
+
             joinedLobby = await JoinLobbyByIdRelay(id);
+
             //joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(id, joinLobbyByIdOptions);
             //OnLobbyDataChanged?.Invoke(this, new OnLobbyDataChangedEventArgs
             //{
             //    lobby = joinedLobby
             //});
             //NetworkManager.Singleton.StartClient();
+
+
+            LoadingUI.Instance.Hide();
         }
         catch (LobbyServiceException e)
         {
+            LoadingUI.Instance.Hide();
             Debug.LogException(e);
         }
     }
@@ -219,9 +250,10 @@ public class LobbyManager : MonoBehaviour
             });
             return joinedLobby;
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Debug.LogError($"Lỗi join lobby: {e}");
+            await ListLobbies();
+            LoadingUI.Instance.Hide();
             return null;
         }
     }
@@ -255,6 +287,7 @@ public class LobbyManager : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogError($"Lỗi join Relay: {e}");
+            LoadingUI.Instance.Hide();
         }
     }
 
@@ -262,27 +295,53 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-            await LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id, AuthenticationService.Instance.PlayerId);
+            LoadingUI.Instance.Show();
+
+            if (NetworkManager.Singleton.IsHost)
+            {
+                await DeleteLobby();
+            }
+            else
+            {
+                await LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id, AuthenticationService.Instance.PlayerId);
+            }
             joinedLobby = null;
-            hostLobby = null;
+            NetworkManager.Singleton.Shutdown();
             OnLobbyDataChanged?.Invoke(this, new OnLobbyDataChangedEventArgs
             {
-                lobby = joinedLobby
+                lobby = null
             });
 
-            NetworkManager.Singleton.Shutdown();
+            LoadingUI.Instance.Hide();
         }
         catch (LobbyServiceException e)
         {
+            LoadingUI.Instance.Hide();
             Debug.LogException(e);
         }
     }
 
+    public async Task DeleteLobby()
+    {
+        if (joinedLobby == null || !NetworkManager.Singleton.IsHost) return;
+
+        try
+        {
+            await LobbyService.Instance.DeleteLobbyAsync(joinedLobby.Id);
+            Debug.Log("Đã xóa lobby");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Lỗi xóa lobby: {e}");
+        }
+    }
+
+
     public async void LockLobby()
     {
-        if (hostLobby != null)
+        if (joinedLobby != null)
         {
-            await LobbyService.Instance.UpdateLobbyAsync(hostLobby.Id, new UpdateLobbyOptions
+            await LobbyService.Instance.UpdateLobbyAsync(joinedLobby.Id, new UpdateLobbyOptions
             {
                 IsLocked = true
             });
@@ -291,26 +350,27 @@ public class LobbyManager : MonoBehaviour
 
     private async void HandleLobbyHeartbeat()
     {
-        if (hostLobby != null)
+        if (joinedLobby != null && NetworkManager.Singleton.IsHost)
         {
             heartbeatTimer -= Time.deltaTime;
             if (heartbeatTimer < 0)
             {
                 heartbeatTimer = 15;
 
-                await LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);
+                await LobbyService.Instance.SendHeartbeatPingAsync(joinedLobby.Id);
             }
         }
     }
 
     private async void HandleLobbyUpdate()
     {
-        if (joinedLobby != null)
+        if (joinedLobby == null) return;
+        try
         {
             lobbyUpdateTimer -= Time.deltaTime;
             if (lobbyUpdateTimer < 0)
             {
-                lobbyUpdateTimer = 1.5f;
+                lobbyUpdateTimer = 5f;
 
                 joinedLobby = await LobbyService.Instance.GetLobbyAsync(joinedLobby.Id);
 
@@ -319,6 +379,15 @@ public class LobbyManager : MonoBehaviour
                     lobby = joinedLobby
                 });
             }
+        }
+        catch (Exception)
+        {
+            joinedLobby = null;
+            OnLobbyDataChanged?.Invoke(this, new OnLobbyDataChangedEventArgs
+            {
+                lobby = joinedLobby
+            });
+            //Debug.LogError("Lỗi Lobby Update " + ex);
         }
     }
 
@@ -359,11 +428,6 @@ public class LobbyManager : MonoBehaviour
                 {"PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, playerName) }
             }
         };
-    }
-
-    public bool IsHost()
-    {
-        return hostLobby != null;
     }
 
     public string GetPlayerName()

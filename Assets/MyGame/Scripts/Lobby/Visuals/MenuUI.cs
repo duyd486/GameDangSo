@@ -44,12 +44,10 @@ public class MenuUI : MonoBehaviour
 
 
 
-        listLobbyBtn.onClick.AddListener(() =>
+        listLobbyBtn.onClick.AddListener(async () =>
         {
-            LobbyManager.Instance.ListLobbies(() =>
-            {
-                OnListLobbyClick?.Invoke(this, EventArgs.Empty);
-            });
+            await LobbyManager.Instance.ListLobbies();
+            OnListLobbyClick?.Invoke(this, EventArgs.Empty);
         });
 
         playerNameInput.text = LobbyManager.Instance.GetPlayer().Data["PlayerName"].Value;
