@@ -7,6 +7,7 @@ public class JumpscareUI : MonoBehaviour
     public static JumpscareUI Instance;
 
     [SerializeField] private Image jumpscareImage;
+    [SerializeField] private Image jumpscareViggnete;
 
     private void Awake()
     {
@@ -34,6 +35,7 @@ public class JumpscareUI : MonoBehaviour
 
         jumpscareImage.sprite = sprite;
         jumpscareImage.enabled = true;
+        jumpscareViggnete.enabled = true;
 
         StartCoroutine(HideAfterDelay(duration));
     }
@@ -42,5 +44,6 @@ public class JumpscareUI : MonoBehaviour
     {
         yield return new WaitForSeconds(duration);
         jumpscareImage.enabled = false;
+        jumpscareViggnete.enabled = false;
     }
 }

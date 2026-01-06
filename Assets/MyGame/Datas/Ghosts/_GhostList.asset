@@ -15,3 +15,6 @@ MonoBehaviour:
   ghosts:
   - {fileID: 11400000, guid: 8ba2ca2aa193d504080e05aa1dff243f, type: 2}
   - {fileID: 11400000, guid: b1597e1760dcea74db6f12738234b64d, type: 2}
+  - {fileID: 11400000, guid: 7060fc50a240f7b47bc760d2aca3bb9e, type: 2}
+  - {fileID: 11400000, guid: 15974689c72635e41889ed31df253bb4, type: 2}
+  - {fileID: 11400000, guid: abb5fae6f31e91d48af5b21c0bf8a0d9, type: 2}
