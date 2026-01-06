@@ -1,10 +1,9 @@
 using Unity.Netcode;
-using Unity.Services.Lobbies;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public static class SceneLoader
 {
+    public static string playerName;
     public enum Scene
     {
         Lobby,

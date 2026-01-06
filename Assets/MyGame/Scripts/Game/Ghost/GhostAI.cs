@@ -87,29 +87,21 @@ public class GhostAI : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void ShowJumpscareClientRpc(ulong clientId, string ghostName)
     {
-        if (clientId != NetworkManager.Singleton.LocalClientId) return;
 
-        Debug.Log(ghostName + " triggering jumpscare for client " + clientId);
-
-        if (JumpscareUI.Instance == null)
+        if (clientId != NetworkManager.Singleton.LocalClientId)
         {
-            Debug.LogError("Client chưa có JumpscareUI");
+            RuntimeUI.Instance.PushMessage("Someone being jumpscare by " + ghostName, false);
             return;
         }
 
-        Debug.Log("Hiện Jumpscare cho client " + clientId);
+        if (JumpscareUI.Instance == null)
+        {
+            RuntimeUI.Instance.PushMessage("JumpscareUI instance is null", true);
+            return;
+        }
 
-        //if (data == null)
-        //{
-        //    Debug.LogError("Ghost data is null");
-        //}
-        //if (data.jumpscareSprite == null)
-        //{
-        //    Debug.LogError("Jumpscare sprite is null");
-        //    return;
-        //}
+        RuntimeUI.Instance.PushMessage("You being jumpscare by " + ghostName, false);
 
-        //JumpscareUI.Instance.ShowJumpscare(data.jumpscareSprite, data.jumpscareTime);
         if (!NetworkManager.Singleton.ConnectedClients
             .TryGetValue(clientId, out var client)) return;
 

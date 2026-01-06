@@ -66,7 +66,9 @@ public class GameManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        Debug.Log("StartGame called on SERVER");
+        RestartGame();
+
+        RuntimeUI.Instance.PushMessage("The game has started!", false);
 
         endTime.Value = NetworkManager.ServerTime.Time + gameDuration;
 
@@ -79,6 +81,18 @@ public class GameManager : NetworkBehaviour
         isPlaying.Value = true;
     }
 
+    public void RestartGame()
+    {
+        if (!IsServer) return;
+        collectedKeys.Value = 0;
+        isPlaying.Value = false;
+        foreach (var key in keys)
+        {
+            Destroy(key.gameObject);
+        }
+        keys.Clear();
+    }
+
 
     public void OnKeyPicked()
     {
@@ -89,7 +103,6 @@ public class GameManager : NetworkBehaviour
     public void OnKeyAdded()
     {
         if (!IsServer) return;
-        Debug.Log("Key added to altar on SERVER");
         collectedKeys.Value++;
         if (collectedKeys.Value >= totalKeys)
         {
@@ -105,20 +118,19 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     void NotifyKeyPickedClientRpc()
     {
-        Debug.Log("A key has been picked up!");
+        RuntimeUI.Instance.PushMessage("Someone picked up a key!", false);
     }
 
     [ClientRpc]
     void NotifyKeyAddedClientRpc(int keyLeft)
     {
-        Debug.Log("A key has been add to atlar! " + keyLeft.ToString() + " keys left!");
+        RuntimeUI.Instance.PushMessage("A key has been added to the altar! " + keyLeft.ToString() + " keys left!", false);
     }
 
 
     [ClientRpc]
     private void WinGameClientRpc()
     {
-        Debug.Log("Congratulations! You won the game!");
         OnGameOver?.Invoke(this, new OnGameOverEventArgs
         {
             isLose = false,
@@ -128,7 +140,6 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void LoseGameClientRpc()
     {
-        Debug.Log("Game Over! You lost.");
         OnGameOver?.Invoke(this, new OnGameOverEventArgs
         {
             isLose = true,

@@ -17,7 +17,7 @@ public class Dev_GameManager : MonoBehaviour
             if (!NetworkManager.Singleton.IsHost)
             {
                 NetworkManager.Singleton.StartHost();
-                Debug.Log("Host started");
+                RuntimeUI.Instance.PushMessage("Host started", false);
             }
         }
         if (Input.GetKeyDown(KeyCode.K))
@@ -25,7 +25,7 @@ public class Dev_GameManager : MonoBehaviour
             if (!NetworkManager.Singleton.IsHost)
             {
                 NetworkManager.Singleton.StartClient();
-                Debug.Log("Client started");
+                RuntimeUI.Instance.PushMessage("Client started", false);
             }
         }
         if (Input.GetKeyDown(KeyCode.Space))

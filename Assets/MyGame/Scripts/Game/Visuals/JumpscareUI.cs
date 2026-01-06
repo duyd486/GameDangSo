@@ -23,13 +23,13 @@ public class JumpscareUI : MonoBehaviour
     {
         if (sprite == null)
         {
-            Debug.LogError("JumpscareUI: sprite null");
+            RuntimeUI.Instance.PushMessage("JumpscareUI: sprite null", true);
             return;
         }
 
         if (jumpscareImage == null)
         {
-            Debug.LogError("JumpscareUI: image null");
+            RuntimeUI.Instance.PushMessage("JumpscareUI: image null", true);
             return;
         }
 

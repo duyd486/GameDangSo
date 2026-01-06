@@ -30,14 +30,21 @@ public class LobbyManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        playerName = "duy" + UnityEngine.Random.Range(10, 99);
-        Debug.Log("Player Name: " + playerName);
     }
 
     private async void Start()
     {
-
         await UnityServices.InitializeAsync();
+
+        if (AuthenticationService.Instance.IsSignedIn)
+        {
+            playerName = SceneLoader.playerName;
+            return;
+        }
+        playerName = "duy" + UnityEngine.Random.Range(10, 99);
+        Debug.Log("Player Name: " + playerName);
+
+        SceneLoader.playerName = playerName;
 
         AuthenticationService.Instance.SignedIn += () =>
         {
@@ -84,12 +91,22 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-            QueryLobbiesOptions options = new QueryLobbiesOptions();
+            QueryLobbiesOptions options = new QueryLobbiesOptions
+            {
+                Filters = new List<QueryFilter>
+            {
+                new QueryFilter(
+                    QueryFilter.FieldOptions.IsLocked,
+                    "0",
+                    QueryFilter.OpOptions.EQ
+                )
+            }
+            };
 
-            QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync();
+            QueryResponse queryResponse =
+                await LobbyService.Instance.QueryLobbiesAsync(options);
 
             currentLobbies = queryResponse.Results;
-
             ShowLobbies();
         }
         catch (LobbyServiceException e)
@@ -138,6 +155,17 @@ public class LobbyManager : MonoBehaviour
         catch (LobbyServiceException e)
         {
             Debug.LogException(e);
+        }
+    }
+
+    public async void LockLobby()
+    {
+        if (hostLobby != null)
+        {
+            await LobbyService.Instance.UpdateLobbyAsync(hostLobby.Id, new UpdateLobbyOptions
+            {
+                IsLocked = true
+            });
         }
     }
 
@@ -193,6 +221,11 @@ public class LobbyManager : MonoBehaviour
     public bool IsHost()
     {
         return hostLobby != null;
+    }
+
+    public string GetPlayerName()
+    {
+        return playerName;
     }
 
     public void SetPlayerName(string playerName)

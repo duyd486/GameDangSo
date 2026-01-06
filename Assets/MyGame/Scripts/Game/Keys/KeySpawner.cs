@@ -10,6 +10,8 @@ public class KeySpawner : NetworkBehaviour
     [SerializeField] private Vector3 spawnAreaMin = new Vector3(-10f, 1f, -10f);
     [SerializeField] private Vector3 spawnAreaMax = new Vector3(10f, 1f, 10f);
 
+    [SerializeField] private List<GameObject> activeKeys;
+
     private void Awake()
     {
         Instance = this;
@@ -22,6 +24,7 @@ public class KeySpawner : NetworkBehaviour
 
     private void GameManager_OnGameStart(object sender, GameManager.OnGameStartEventArgs e)
     {
+        ClearActiveKeys();
         SpawnKeys(e.totalKeys);
     }
 
@@ -42,6 +45,16 @@ public class KeySpawner : NetworkBehaviour
             keyInstance.GetComponent<NetworkObject>().Spawn();
         }
     }
+
+    void ClearActiveKeys()
+    {
+        foreach (GameObject key in activeKeys)
+        {
+            key.GetComponent<NetworkObject>().Despawn();
+        }
+        activeKeys.Clear();
+    }
+
     private Vector3 GetRandomSpawnPosition()
     {
         float x = Random.Range(spawnAreaMin.x, spawnAreaMax.x);
