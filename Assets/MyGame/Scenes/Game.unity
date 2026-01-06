@@ -1242,6 +1242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverUI
   resultText: {fileID: 1616665731}
+  mainMenuBtn: {fileID: 672590364}
 --- !u!1 &413076252
 GameObject:
   m_ObjectHideFlags: 0
