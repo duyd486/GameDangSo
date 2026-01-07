@@ -1,11 +1,13 @@
-﻿using Unity.Netcode;
+﻿using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class GhostAI : NetworkBehaviour
 {
     private GhostData data;
 
-    private Transform[] keyPoints;
+    //private Transform[] keyPoints;
+    [SerializeField] private List<Transform> targetPoints;
     private int currentKeyIndex;
 
     private Transform targetPlayer;
@@ -35,7 +37,7 @@ public class GhostAI : NetworkBehaviour
 
     void Patrol()
     {
-        if (keyPoints.Length == 0)
+        if (targetPoints.Count == 0)
         {
             FindKeys();
             return;
@@ -141,8 +143,8 @@ public class GhostAI : NetworkBehaviour
     void MoveToNextKey()
     {
         FindKeys();
-        currentKeyIndex = Random.Range(0, keyPoints.Length);
-        targetKey = keyPoints[currentKeyIndex];
+        currentKeyIndex = Random.Range(0, targetPoints.Count - 1);
+        targetKey = targetPoints[currentKeyIndex];
     }
 
     void MoveTowards(Vector3 target, float speed)
@@ -156,10 +158,25 @@ public class GhostAI : NetworkBehaviour
 
     void FindKeys()
     {
+        targetPoints.Clear();
+
         var keys = GameManager.Instance.GetKeys();
-        keyPoints = new Transform[keys.Count];
-        for (int i = 0; i < keys.Count; i++)
-            keyPoints[i] = keys[i].transform;
+        //keyPoints = new Transform[keys.Count];
+
+        foreach (var key in keys)
+        {
+            targetPoints.Add(key.transform);
+        }
+        foreach(var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            var player = client.PlayerObject;
+            if (player == null) continue;
+            targetPoints.Add(player.transform);
+        }
+
+
+        //for (int i = 0; i < keys.Count; i++)
+        //    keyPoints[i] = keys[i].transform;
 
         currentKeyIndex = 0;
     }
