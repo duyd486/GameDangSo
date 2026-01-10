@@ -1,0 +1,188 @@
+﻿using System.Collections.Generic;
+using Unity.Netcode;
+using UnityEngine;
+
+public class GhostAI : NetworkBehaviour
+{
+    private GhostData data;
+
+    //private Transform[] keyPoints;
+    [SerializeField] private List<Transform> targetPoints;
+    private int currentKeyIndex;
+
+    private Transform targetPlayer;
+    private Transform targetKey;
+
+    private enum State { Patrol, Chase }
+    private State state;
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer) return;
+
+        FindKeys();
+        state = State.Patrol;
+    }
+
+    void Update()
+    {
+        if (!IsServer || !GameManager.Instance.GetIsPlaying()) return;
+        DetectPlayer();
+
+        if (state == State.Patrol)
+            Patrol();
+        else
+            Chase();
+    }
+
+    void Patrol()
+    {
+        if (targetPoints.Count == 0)
+        {
+            FindKeys();
+            return;
+        }
+
+        if (targetKey == null)
+            MoveToNextKey();
+
+        MoveTowards(targetKey.position, data.patrolSpeed);
+
+        if (Vector3.Distance(transform.position, targetKey.position) < data.reachDistance)
+        {
+            MoveToNextKey();
+        }
+    }
+
+    void Chase()
+    {
+        if (targetPlayer == null)
+        {
+            ReturnToPatrol();
+            return;
+        }
+
+        float dist = Vector3.Distance(transform.position, targetPlayer.position);
+
+        if (dist > data.loseRadius)
+        {
+            ReturnToPatrol();
+            return;
+        }
+
+        if (dist < data.jumpScareRadius)
+        {
+            //jumpscare
+            TriggerJumpscare(targetPlayer.GetComponent<NetworkObject>().OwnerClientId);
+            //go to somewhere else
+            transform.position = GhostSpawner.Instance.GetRandomSpawnPosition();
+        }
+
+        MoveTowards(targetPlayer.position, data.chaseSpeed);
+    }
+
+    void TriggerJumpscare(ulong clientId)
+    {
+        ShowJumpscareClientRpc(clientId, data.ghostName);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    void ShowJumpscareClientRpc(ulong clientId, string ghostName)
+    {
+        if (IsServer)
+        {
+            GameManager.Instance.ReduceTime(data.timerReduce);
+        }
+        if (clientId != NetworkManager.Singleton.LocalClientId)
+        {
+            RuntimeUI.Instance.PushMessage("Someone being jumpscare by " + ghostName, false);
+            return;
+        }
+
+        if (JumpscareUI.Instance == null)
+        {
+            RuntimeUI.Instance.PushMessage("JumpscareUI instance is null", true);
+            return;
+        }
+
+        RuntimeUI.Instance.PushMessage("You being jumpscare by " + ghostName, false);
+
+        if (!NetworkManager.Singleton.ConnectedClients
+            .TryGetValue(clientId, out var client)) return;
+
+        var player = client.PlayerObject.GetComponent<PlayerJumpscare>();
+        player.TriggerJumpscare(ghostName);
+    }
+
+    void DetectPlayer()
+    {
+        if (state == State.Chase) return;
+
+        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            var player = client.PlayerObject;
+            if (player == null) continue;
+
+            float dist = Vector3.Distance(transform.position, player.transform.position);
+            if (dist <= data.detectRadius)
+            {
+                targetPlayer = player.transform;
+                state = State.Chase;
+                return;
+            }
+        }
+    }
+
+    void ReturnToPatrol()
+    {
+        targetPlayer = null;
+        state = State.Patrol;
+        MoveToNextKey();
+    }
+
+    void MoveToNextKey()
+    {
+        FindKeys();
+        currentKeyIndex = Random.Range(0, targetPoints.Count - 1);
+        targetKey = targetPoints[currentKeyIndex];
+    }
+
+    void MoveTowards(Vector3 target, float speed)
+    {
+        Vector3 dir = (target - transform.position).normalized;
+        transform.position += dir * speed * Time.deltaTime;
+
+        if (dir != Vector3.zero)
+            transform.forward = dir;
+    }
+
+    void FindKeys()
+    {
+        targetPoints.Clear();
+
+        var keys = GameManager.Instance.GetKeys();
+        //keyPoints = new Transform[keys.Count];
+
+        foreach (var key in keys)
+        {
+            targetPoints.Add(key.transform);
+        }
+        foreach(var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            var player = client.PlayerObject;
+            if (player == null) continue;
+            targetPoints.Add(player.transform);
+        }
+
+
+        //for (int i = 0; i < keys.Count; i++)
+        //    keyPoints[i] = keys[i].transform;
+
+        currentKeyIndex = 0;
+    }
+
+    public void SetData(GhostData ghostData)
+    {
+        data = ghostData;
+    }
+}

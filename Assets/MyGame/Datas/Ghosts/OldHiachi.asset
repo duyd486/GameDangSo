@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 268bd31c472aca644b5666b9beb31f89, type: 3}
+  m_Name: OldHiachi
+  m_EditorClassIdentifier: Assembly-CSharp::GhostData
+  ghostName: OldHiachi
+  ghostPrefab: {fileID: 5409465159564864822, guid: 3c23e886169521940a8764c89daa8c9e, type: 3}
+  jumpscareSprite: {fileID: 21300000, guid: c4185ab8c12742b4f89bcf6745bdd3ce, type: 3}
+  patrolSpeed: 1
+  chaseSpeed: 6
+  detectRadius: 8
+  jumpScareRadius: 1.5
+  loseRadius: 9
+  reachDistance: 1
+  jumpscareDistance: 1.2
+  jumpscareDuration: 1.5
+  jumpscareCooldown: 3
+  jumpscareEffect: 0.5
